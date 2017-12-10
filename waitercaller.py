@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import config
 from flask import Flask
 from flask import render_template
 from flask import redirect
@@ -9,6 +10,7 @@ from flask_login import LoginManager
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from flask_login import current_user
 
 from mockdbhelper import MockDBHelper as DBHelper
 from user import User
@@ -36,7 +38,24 @@ def dashboard():
 @app.route("/account")
 @login_required
 def account():
-    return render_template("account.html")
+    tables = DB.get_tables(current_user.get_id())
+    return render_template("account.html", tables=tables)
+
+@app.route("/account/createtable", methods=["POST"])
+@login_required
+def account_createtable():
+    tablename = request.form.get("tablenumber")
+    tableid = DB.add_table(tablename, current_user.get_id())
+    new_url = config.base_url + "newrequest/" + tableid
+    DB.update_table(tableid, new_url)
+    return redirect(url_for('account'))
+
+@app.route("/account/deletetable", methods=["POST"])
+@login_required
+def account_deletetable():
+    tableid = request.form.get("tableid")
+    DB.delete_table(tableid)
+    return redirect(url_for('account'))
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -67,7 +86,6 @@ def register():
     hashed = PH.get_hash(pw1 + salt)
     DB.add_user(email, salt, hashed)
     return redirect(url_for('home'))
-
 
 @login_manager.user_loader
 def load_user(user_id):
