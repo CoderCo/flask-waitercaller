@@ -28,10 +28,15 @@ login_manager = LoginManager(app)
 def home():
     return render_template("home.html")
 
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
 @app.route("/account")
 @login_required
 def account():
-    return "You are logged in"
+    return render_template("account.html")
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -42,7 +47,7 @@ def login():
         user = User(email)
         login_user(user, remember=True)
         return redirect(url_for('account'))
-    return home()
+    return redirect(url_for('home'))
 
 @app.route("/logout")
 def logout():
