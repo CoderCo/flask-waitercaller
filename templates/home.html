@@ -28,13 +28,26 @@ endif %}>
         </div>
     {% else %}
         <form class="navbar-form navbar-right" action="/login" method="POST">
+
+        {% if loginform.errors %}
+            <ul class="errors">
+                {% for field_name, field_errors in loginform.errors|dictsort if field_errors %}
+                    {% for error in field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {{ loginform.csrf_token }}
         <div class="form-group">
-            <input type="text" name="email" placeholder="Email" class="form-control">
+            {{ loginform.loginemail(class="form-control", placeholder="Email Addreess") }}
         </div>
         <div class="form-group">
-            <input type="password" name="password" placeholder="Password" class="form-control">
+            {{ loginform.loginpassword(class="form-control", placeholder="Password") }}
         </div>
-        <button type="submit" class="btn btn-success">Sign in</button>
+        <div class="form-group">
+            {{ loginform.submit(value="Sign In", class="btn btn-success") }}
+        </div>
         </form>
     {% endif %}
     </div><!--/.navbar-collapse -->

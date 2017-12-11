@@ -11,3 +11,9 @@ class RegistrationForm(Form):
     password = PasswordField('password', validators=[validators.DataRequired(), validators.Length(min=8, message="Please choose a password of at least 8 characters")])
     password2 = PasswordField('password2', validators=[validators.DataRequired(), validators.EqualTo('password', message="Password Must Match")])
     submit = SubmitField('submit', [validators.DataRequired()])
+
+
+class LoginForm(Form):
+    loginemail = EmailField('email', validators=[validators.DataRequired(), validators.Email()])
+    loginpassword = PasswordField('password', validators=[validators.DataRequired(message="Password field is required")])
+    submit = SubmitField('submit', [validators.DataRequired()])

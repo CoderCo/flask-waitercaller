@@ -18,7 +18,7 @@ from user import User
 from passwordhelper import PasswordHelper
 from bitlyhelper import BitlyHelper
 
-from forms import RegistrationForm
+from forms import RegistrationForm, LoginForm
 
 DB = DBHelper()
 PH = PasswordHelper()
@@ -34,8 +34,9 @@ login_manager = LoginManager(app)
 @app.route("/")
 def home():
     is_authenticated = current_user.is_authenticated
-    registrationform = RegistrationForm()
-    return render_template("home.html", is_authenticated=is_authenticated, registrationform=registrationform)
+    return render_template("home.html", is_authenticated=is_authenticated,
+                    loginform=LoginForm(),
+                    registrationform=RegistrationForm())
 
 @app.route("/dashboard")
 @login_required
@@ -83,14 +84,18 @@ def new_request(tid):
 
 @app.route("/login", methods=["POST"])
 def login():
-    email = request.form.get("email")
-    password = request.form.get("password")
-    stored_user = DB.get_user(email)
-    if stored_user and PH.validate_password(password, stored_user['salt'], stored_user['hashed']):
-        user = User(email)
-        login_user(user, remember=True)
-        return redirect(url_for('dashboard'))
-    return redirect(url_for('home'))
+    form = LoginForm(request.form)
+    if form.validate():
+        stored_user = DB.get_user(form.loginemail.data)
+        if stored_user and PH.validate_password(form.loginpassword.data,
+                                                stored_user['salt'],
+                                                stored_user['hashed']):
+            user = User(form.loginemail.data)
+            login_user(user, remember=True)
+            return redirect(url_for('dashboard'))
+        form.loginemail.errors.append("Email or Password invalid")
+    return render_template('home.html', loginform=form,
+                    registrationform=RegistrationForm())
 
 @app.route("/logout")
 def logout():
@@ -106,10 +111,13 @@ def register():
         salt = PH.get_salt()
         hashed = PH.get_hash(form.password2.data + salt)
         DB.add_user(form.email.data, salt, hashed)
-        return render_template("home.html", registrationform=form,
+        return render_template("home.html",
+                loginform=LoginForm(),
+                registrationform=form,
                 onloadmessage="Registration successfully. Please log in.")
-    return render_template("home.html", registrationform=form,
-            onloadmessage="Registration successfully. Please log in.")
+    return render_template("home.html",
+                    registrationform=form,
+                    loginform=LoginForm())
 
 @login_manager.user_loader
 def load_user(user_id):
