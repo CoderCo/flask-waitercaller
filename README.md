@@ -34,3 +34,32 @@ $ sudo service apache2 reload
 
 6. Open in your browser [http://127.0.0.1](http://127.0.0.1)
 
+
+---
+
+## Others
+
+
+If using mongo database
+
+1. Install Mongo Database
+```bash
+$ sudo apt-get install -y mongodb-org
+```
+
+2. Install `pymongo` package
+```bash
+$ pip install pymongo
+```
+
+3. Create Index In Mongo
+```bash
+$ python create_mongo_indices.py
+```
+
+4. Change `config.py` from `test=True` to `test=False`
+
+5. Run It!
+```bash
+$ python waitercaller.py
+```
