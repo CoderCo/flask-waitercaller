@@ -45,6 +45,15 @@
           <a class="navbar-brand" href="#">Waiter Caller</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
+        {% if is_authenticated %}
+          <div class="container">
+              <div class="navbar-header navbar-right">
+                  <a class="navbar-brand" href="/dashboard">Dashboard</a>
+                  <a class="navbar-brand" href="/account">Account</a>
+                  <a class="navbar-brand" href="/logout">Log Out</a>
+              </div>
+          </div>
+        {% else %}
           <form class="navbar-form navbar-right" action="/login" method="POST">
             <div class="form-group">
               <input type="text" name="email" placeholder="Email" class="form-control">
@@ -54,6 +63,7 @@
             </div>
             <button type="submit" class="btn btn-success">Sign in</button>
           </form>
+        {% endif %}
         </div><!--/.navbar-collapse -->
       </div>
     </nav>

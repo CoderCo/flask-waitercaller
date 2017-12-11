@@ -31,7 +31,8 @@ login_manager = LoginManager(app)
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    is_authenticated = current_user.is_authenticated
+    return render_template("home.html", is_authenticated=is_authenticated)
 
 @app.route("/dashboard")
 @login_required
@@ -85,7 +86,7 @@ def login():
     if stored_user and PH.validate_password(password, stored_user['salt'], stored_user['hashed']):
         user = User(email)
         login_user(user, remember=True)
-        return redirect(url_for('account'))
+        return redirect(url_for('dashboard'))
     return redirect(url_for('home'))
 
 @app.route("/logout")
