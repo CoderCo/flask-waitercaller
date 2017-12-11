@@ -18,6 +18,8 @@ from user import User
 from passwordhelper import PasswordHelper
 from bitlyhelper import BitlyHelper
 
+from forms import RegistrationForm
+
 DB = DBHelper()
 PH = PasswordHelper()
 BH = BitlyHelper()
@@ -32,7 +34,8 @@ login_manager = LoginManager(app)
 @app.route("/")
 def home():
     is_authenticated = current_user.is_authenticated
-    return render_template("home.html", is_authenticated=is_authenticated)
+    registrationform = RegistrationForm()
+    return render_template("home.html", is_authenticated=is_authenticated, registrationform=registrationform)
 
 @app.route("/dashboard")
 @login_required
@@ -96,17 +99,17 @@ def logout():
 
 @app.route("/register", methods=["POST"])
 def register():
-    email = request.form.get("email")
-    pw1 = request.form.get("password")
-    pw2 = request.form.get("password2")
-    if not pw1 == pw2:
-        return redirect(url_for('home'))
-    if DB.get_user(email):
-        return redirect(url_for('home'))
-    salt = PH.get_salt()
-    hashed = PH.get_hash(pw1 + salt)
-    DB.add_user(email, salt, hashed)
-    return redirect(url_for('home'))
+    form = RegistrationForm(request.form)
+    if form.validate():
+        if DB.get_user(form.email.data):
+            form.email.errors.append("Email address already registered")
+        salt = PH.get_salt()
+        hashed = PH.get_hash(form.password2.data + salt)
+        DB.add_user(form.email.data, salt, hashed)
+        return render_template("home.html", registrationform=form,
+                onloadmessage="Registration successfully. Please log in.")
+    return render_template("home.html", registrationform=form,
+            onloadmessage="Registration successfully. Please log in.")
 
 @login_manager.user_loader
 def load_user(user_id):
